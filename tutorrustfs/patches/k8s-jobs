@@ -1,0 +1,19 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  # Must be `<service>-job` to match the name registered with
+  # CLI_DO_INIT_TASKS in plugin.py.
+  name: rustfs-job
+  labels:
+    app.kubernetes.io/component: job
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        # The `mc` client, not the RustFS server: the init task only
+        # creates buckets and sets policies over the S3 API.
+        - name: rustfs
+          image: {{ RUSTFS_MC_DOCKER_IMAGE }}
+          command: []

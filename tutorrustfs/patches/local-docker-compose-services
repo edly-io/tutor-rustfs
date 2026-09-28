@@ -1,0 +1,29 @@
+# RustFS: S3-compatible object storage.
+# Ports match MinIO's (9000 S3 API, 9001 console) so that reverse-proxy
+# config and `AWS_S3_ENDPOINT_URL` carry over from a MinIO deployment.
+#
+# ⚠️  ACTION REQUIRED ON A FRESH INSTALL (Linux hosts).
+# RustFS runs as non-root UID {{ RUSTFS_UID }}, but when the bind-mount source
+# does not exist yet the Docker daemon creates it owned by root:root.
+# RustFS then aborts on startup with:
+#     [FATAL] Server runtime failed: Io error: Permission denied (os error 13)
+# Create the directory with the right owner *before* the first
+# `tutor local start`:
+#     mkdir -p "$(tutor config printroot)/data/rustfs"
+#     sudo chown -R {{ RUSTFS_UID }}:{{ RUSTFS_GID }} "$(tutor config printroot)/data/rustfs"
+# (Docker Desktop on macOS/Windows maps bind-mount ownership to the host
+# user, so this only bites on native Linux — i.e. most production hosts.)
+rustfs:
+  image: {{ RUSTFS_DOCKER_IMAGE }}
+  user: "{{ RUSTFS_UID }}:{{ RUSTFS_GID }}"
+  volumes:
+    - ../../data/rustfs:/data
+  environment:
+    RUSTFS_ACCESS_KEY: "{{ OPENEDX_AWS_ACCESS_KEY }}"
+    RUSTFS_SECRET_KEY: "{{ OPENEDX_AWS_SECRET_ACCESS_KEY }}"
+    RUSTFS_VOLUMES: "/data"
+    RUSTFS_ADDRESS: ":9000"
+    RUSTFS_REGION: "{{ RUSTFS_REGION }}"
+    RUSTFS_CONSOLE_ENABLE: "true"
+    RUSTFS_CONSOLE_ADDRESS: ":9001"
+  restart: unless-stopped

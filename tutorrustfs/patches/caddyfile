@@ -1,0 +1,14 @@
+# RustFS S3 API.
+{{ RUSTFS_HOST }}{$default_site_port} {
+    import proxy "rustfs:9000"
+}
+# RustFS web console.
+{{ RUSTFS_CONSOLE_HOST }}{$default_site_port} {
+    # RustFS does not serve its web console at the root of the console
+    # port: 9001 serves the S3 API at "/" and mounts the console under
+    # "/rustfs/console/", so proxying "/" straight through lands
+    # visitors on an S3 "AccessDenied" XML document. Redirect the bare
+    # host to the console path; everything else proxies unchanged.
+    redir / /rustfs/console/ 302
+    import proxy "rustfs:9001"
+}

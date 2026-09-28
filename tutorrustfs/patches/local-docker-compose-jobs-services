@@ -1,0 +1,13 @@
+# Init/admin job container.
+#
+# RustFS is wire-compatible with the MinIO `mc` client, so we run the
+# init logic (bucket creation + anonymous read policy) from the MinIO
+# Client image. The RustFS image does not ship `mc` itself.
+#
+# The service name must be `<service>-job`, where `<service>` is the
+# name registered with CLI_DO_INIT_TASKS in plugin.py — Tutor appends
+# the `-job` suffix when it resolves the task.
+rustfs-job:
+  image: {{ RUSTFS_MC_DOCKER_IMAGE }}
+  entrypoint: []
+  depends_on: ["rustfs"]

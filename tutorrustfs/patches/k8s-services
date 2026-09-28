@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rustfs
+spec:
+  type: NodePort
+  ports:
+    - port: 9000
+      protocol: TCP
+      name: s3-api
+    - port: 9001
+      protocol: TCP
+      name: console
+  selector:
+    app.kubernetes.io/name: rustfs
