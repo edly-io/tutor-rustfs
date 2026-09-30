@@ -25,7 +25,7 @@ EXPECTED_KEYS = {
     "RUSTFS_REGION",
     "RUSTFS_QUERYSTRING_AUTH",
     "RUSTFS_DOCKER_IMAGE",
-    "RUSTFS_MC_DOCKER_IMAGE",
+    "RUSTFS_RC_DOCKER_IMAGE",
     "RUSTFS_UID",
     "RUSTFS_GID",
     "RUSTFS_AWS_SECRET_ACCESS_KEY",
@@ -49,7 +49,7 @@ def test_plugin_config_is_namespaced(config: dict[str, t.Any]) -> None:
     tutor-minio shipped an unprefixed ``MC_DOCKER_IMAGE`` which polluted
     the global Tutor namespace. Guard against repeating that.
     """
-    unprefixed = {"MC_DOCKER_IMAGE", "DOCKER_IMAGE", "BUCKET_NAME", "REGION", "UID"}
+    unprefixed = {"RC_DOCKER_IMAGE", "DOCKER_IMAGE", "BUCKET_NAME", "REGION", "UID"}
     collisions = sorted(unprefixed & set(config))
     assert not collisions, f"unprefixed keys pollute the global namespace: {collisions}"
 
@@ -90,23 +90,22 @@ def test_init_task_registered_for_rustfs_service() -> None:
     tasks = dict(tutor_hooks.Filters.CLI_DO_INIT_TASKS.iterate())
     assert "rustfs" in tasks, f"no init task for 'rustfs'; got {sorted(tasks)}"
     script = tasks["rustfs"]
-    assert "mc mb" in script
-    assert "mc policy set download" in script
+    assert "rc mb" in script
+    assert "rc anonymous set download" in script
 
 
 def test_public_buckets_are_read_only() -> None:
-    """`mc policy set public` means anonymous read *and write*.
+    """`rc anonymous set public` means anonymous read *and write*.
 
     Using it lets anyone who can reach RUSTFS_HOST upload to and delete
     from the bucket without credentials. `download` is read-only, which
     is all forum images and public assets need.
     """
     script = dict(tutor_hooks.Filters.CLI_DO_INIT_TASKS.iterate())["rustfs"]
-    assert "mc policy set public" not in script, (
-        "`mc policy set public` grants anonymous write; use `download`"
+    assert "rc anonymous set public" not in script, (
+        "`rc anonymous set public` grants anonymous write; use `download`"
     )
-    assert "mc policy set upload" not in script
-    assert "mc anonymous set public" not in script
+    assert "rc anonymous set upload" not in script
 
 
 def test_console_host_is_publicly_routed() -> None:

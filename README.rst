@@ -106,9 +106,10 @@ Server:
 - ``RUSTFS_DOCKER_IMAGE`` (default: ``"docker.io/rustfs/rustfs:1.0.0"``) —
   pinned to an explicit tag so deployments are reproducible. Multi-arch
   (``linux/amd64`` and ``linux/arm64``).
-- ``RUSTFS_MC_DOCKER_IMAGE`` — the MinIO Client image used by the bucket
-  provisioning job. The RustFS image does not ship ``mc``, and RustFS is
-  wire-compatible with it.
+- ``RUSTFS_RC_DOCKER_IMAGE`` (default: ``"docker.io/rustfs/rc:v0.1.36"``) —
+  the ``rc`` CLI image used by the bucket provisioning job. ``rc`` is
+  RustFS's own S3-compatible client; the RustFS server image does not
+  ship a client itself.
 - ``RUSTFS_REGION`` (default: ``"us-east-1"``) — matches RustFS's own default.
 - ``RUSTFS_UID`` / ``RUSTFS_GID`` (both default: ``10001``) — the non-root user
   inside the container.

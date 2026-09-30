@@ -9,8 +9,8 @@
   succeeding `tutor-minio` now that MinIO is archived upstream.
 
   Feature parity with `tutor-minio` is intentional — same buckets, same ports,
-  same `mc` tooling, same bucket policies, same `discovery` and `xqueue`
-  integrations — with the following differences:
+  same bucket policies, same `discovery` and `xqueue` integrations — with the
+  following differences:
 
   - 💥 **No gateway mode.** There is no `RUSTFS_GATEWAY` setting. MinIO
     removed gateway mode in 2022 and RustFS never had it. Use
@@ -19,7 +19,14 @@
   - 💥 **Config keys are `RUSTFS_`-prefixed.** Every `MINIO_*` key has a
     `RUSTFS_*` equivalent with the same default value. `MC_DOCKER_IMAGE`,
     which `tutor-minio` registered unprefixed in the global Tutor namespace,
-    is now `RUSTFS_MC_DOCKER_IMAGE`.
+    is now `RUSTFS_RC_DOCKER_IMAGE`.
+  - 💥 **Bucket provisioning uses `rc`, not `mc`.** `rc` is RustFS's own
+    S3-compatible CLI, published by the RustFS project itself. `tutor-minio`
+    depended on MinIO's `mc` image; MinIO Inc. pulled `mc` from Docker Hub and
+    then, in September 2026, locked down anonymous pulls from its Quay mirror
+    too, breaking any deployment still pinned to it. `rc` has a direct
+    equivalent for every `mc` command this plugin used, including
+    `rc anonymous set download` for the read-only public-bucket policy.
   - 💥 **The console lives at a path.** RustFS serves the S3 API at `/` on
     port 9001 and mounts the console under `/rustfs/console/`. The
     `caddyfile` patch redirects, so `http://<RUSTFS_CONSOLE_HOST>` works; in
@@ -37,8 +44,8 @@
   - This plugin and `tutor-minio` cannot be enabled simultaneously; doing so
     raises an error rather than producing a subtly broken stack.
 
-- [Security] The public bucket is now created with `mc policy set download`
-  (anonymous read) instead of `mc policy set public`. In `mc`'s policy
+- [Security] The public bucket is now created with `rc anonymous set download`
+  (anonymous read) instead of `mc policy set public`. In both tools' policy
   vocabulary `public` means anonymous read **and write**: on a deployment
   whose S3 endpoint is reachable from the internet, anyone could upload
   objects to and delete objects from the main Open edX bucket without
