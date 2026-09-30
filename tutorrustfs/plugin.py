@@ -23,8 +23,14 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 # This plugin is a successor to tutor-minio. MinIO was archived upstream
 # (last release RELEASE.2025-10-15T17-29-55Z), so this plugin runs
 # RustFS (https://github.com/rustfs/rustfs) instead: a Rust
-# reimplementation of the MinIO S3 API that uses the same ports, the
-# same `mc` tooling, and the same bucket policy semantics.
+# reimplementation of the MinIO S3 API that uses the same ports and the
+# same bucket policy semantics. Bucket provisioning uses `rc`
+# (https://github.com/rustfs/cli), RustFS's own S3-compatible CLI,
+# rather than MinIO's `mc`: MinIO Inc. pulled `mc` from Docker Hub and
+# then, in September 2026, locked down anonymous pulls from Quay too,
+# so depending on it here would mean inheriting that registry risk for
+# no reason — RustFS's own tooling is already a required trust
+# boundary for this plugin.
 #
 # Feature parity with tutor-minio is intentional, with one exception:
 # there is no gateway mode. MinIO removed gateway mode in 2022 and
@@ -68,10 +74,11 @@ config: dict[str, dict[str, t.Any]] = {
         # can't silently change the object store under a running
         # deployment. Multi-arch (linux/amd64 + linux/arm64).
         "DOCKER_IMAGE": "docker.io/rustfs/rustfs:1.0.0",
-        # The RustFS image does not ship `mc`, and `mc` is a plain Go
-        # binary published separately, so the init/admin job runs from
-        # the MinIO Client image. RustFS is wire-compatible with it.
-        "MC_DOCKER_IMAGE": "docker.io/minio/mc:RELEASE.2022-03-31T04-55-30Z",
+        # The RustFS image does not ship a client, so the init/admin job
+        # runs from `rc`'s own image, published by the RustFS project at
+        # https://hub.docker.com/r/rustfs/rc. Pinned to an explicit tag
+        # for the same reason as RUSTFS_DOCKER_IMAGE above.
+        "RC_DOCKER_IMAGE": "docker.io/rustfs/rc:v0.1.36",
         # RustFS containers run as UID 10001. We pass this explicitly to
         # the `user:` directive so one-shot commands don't run as root
         # and leave root-owned files in the data volume. Override if

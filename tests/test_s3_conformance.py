@@ -125,23 +125,23 @@ def test_anonymous_read_on_public_bucket(s3: t.Any, bucket: str, key: str) -> No
     response = requests.get(f"{ENDPOINT}/{bucket}/{key}", timeout=30)
     assert response.status_code == 200, (
         f"anonymous read failed ({response.status_code}); "
-        "check `mc policy set public` ran"
+        "check `rc anonymous set download` ran"
     )
 
 
 def test_anonymous_write_is_rejected(s3: t.Any, bucket: str) -> None:
     """The public bucket must be readable, not writable.
 
-    `mc policy set public` grants anonymous write; `download` does not.
-    If this passes with a 2xx, anyone who can reach the endpoint can
-    upload to and delete from the bucket without credentials.
+    `rc anonymous set public` grants anonymous write; `download` does
+    not. If this passes with a 2xx, anyone who can reach the endpoint
+    can upload to and delete from the bucket without credentials.
     """
     requests = pytest.importorskip("requests")
     probe = f"{ENDPOINT}/{bucket}/tutor-rustfs-test/anon-write-probe.txt"
     response = requests.put(probe, data=b"should be rejected", timeout=30)
     assert response.status_code == 403, (
         f"anonymous write returned {response.status_code}; the bucket policy "
-        "grants unauthenticated writes. Use `mc policy set download`."
+        "grants unauthenticated writes. Use `rc anonymous set download`."
     )
     delete = requests.delete(f"{ENDPOINT}/{bucket}/", timeout=30)
     assert delete.status_code in (403, 405), (

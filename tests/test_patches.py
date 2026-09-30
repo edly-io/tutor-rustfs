@@ -157,12 +157,13 @@ def test_k8s_job_name_matches_init_task(rendered: dict[str, str]) -> None:
     assert job["metadata"]["name"] == "rustfs-job"
 
 
-def test_init_job_uses_the_mc_image(
+def test_init_job_uses_the_rc_image(
     rendered: dict[str, str], config: dict[str, t.Any]
 ) -> None:
-    """The RustFS image does not ship `mc`, so the job must not use it."""
+    """The RustFS server image does not ship a client, so the job must
+    use the `rc` CLI image instead of the server image."""
     jobs = yaml.safe_load(rendered["local-docker-compose-jobs-services"])
-    assert jobs["rustfs-job"]["image"] == config["RUSTFS_MC_DOCKER_IMAGE"]
+    assert jobs["rustfs-job"]["image"] == config["RUSTFS_RC_DOCKER_IMAGE"]
     assert jobs["rustfs-job"]["image"] != config["RUSTFS_DOCKER_IMAGE"]
 
 
