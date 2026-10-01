@@ -40,7 +40,7 @@
   - 💥 **No in-place migration from MinIO.** RustFS cannot read a MinIO data
     directory in the stock image; MinIO on-disk compatibility is gated behind
     the `rio-v2` cargo feature and is not part of the default build. Export
-    with `mc mirror` before switching. See the README.
+    with `rc mirror` before switching. See the README.
   - This plugin and `tutor-minio` cannot be enabled simultaneously; doing so
     raises an error rather than producing a subtly broken stack.
 

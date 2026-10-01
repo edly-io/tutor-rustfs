@@ -169,10 +169,14 @@ in the stock image: upstream ships MinIO on-disk compatibility behind the
 MinIO wrote encrypted are not readable by RustFS at all. Pointing RustFS at
 your existing ``data/minio`` volume will not migrate anything.
 
-1. **Export your objects with** ``mc mirror`` **while MinIO is still running.**
-   This step is not optional::
+1. **Export your objects with** ``rc mirror`` **while MinIO is still running.**
+   This step is not optional. ``rc`` — the same CLI this plugin uses for
+   bucket provisioning, see ``RUSTFS_RC_DOCKER_IMAGE`` below — is a generic
+   S3 client, so it works against a live MinIO server just as well as
+   against RustFS::
 
-       mc mirror minio/openedx ./backup/openedx/
+       rc alias set minio http://<your-minio-host>:9000 <access-key> <secret-key>
+       rc mirror minio/openedx ./backup/openedx/
 
    Repeat for each bucket.
 
@@ -198,7 +202,8 @@ your existing ``data/minio`` volume will not migrate anything.
 
 5. Re-import your objects::
 
-       mc mirror ./backup/openedx/ rustfs/openedx/
+       rc alias set rustfs http://<your-rustfs-host>:9000 <access-key> <secret-key>
+       rc mirror ./backup/openedx/ rustfs/openedx/
 
 Testing
 -------
