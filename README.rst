@@ -1,6 +1,21 @@
 Object storage for Open edX with `RustFS <https://github.com/rustfs/rustfs>`_
 =============================================================================
 
+.. warning::
+
+   **This plugin is deprecated and no longer maintained.** It has been
+   superseded by `tutor-objectstorage
+   <https://github.com/overhangio/tutor-objectstorage>`_.
+
+   RustFS itself is not going away: it is still the storage engine. Only the
+   plugin changes. ``tutor-objectstorage`` packages the same RustFS backend
+   (plus Azure and external S3 backends) under a single ``OBJSTORAGE_BACKEND``
+   setting, replacing both this plugin and the old ``tutor-minio``.
+
+   Its RustFS backend keeps the same service names, bind-mount path, and PVC
+   name as this plugin, so migrating is a config-key rename rather than a data
+   migration. See its ``MIGRATING.rst`` for the step-by-step procedure.
+
 This is a plugin for `Tutor <https://docs.tutor.edly.io>`_ that provides
 S3-compatible object storage for Open edX platforms, backed by
 `RustFS <https://github.com/rustfs/rustfs>`_ — a Rust reimplementation of the
